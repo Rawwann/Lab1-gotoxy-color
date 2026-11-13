@@ -6,6 +6,21 @@
 #include "setcolor.h"
 #include "setposition.h"
 
+#define MAX_EMP 20
+#define TOTAL_OPT 3
+#define NEW 0
+#define DISPLAY 1
+#define EXIT 2
+#define X 5
+#define Y_TITLE 3
+#define Y_ID 5
+#define Y_SORRY 5
+#define Y_NAME 6
+#define Y_MSG 7
+#define Y_ESC 11
+#define ESC '\033'
+#define CLR "\033[2J\033[H"
+
 using namespace std;
 
 class Employee {
@@ -21,11 +36,11 @@ template <typename T>
 void displayEmp(const T employees[], const int empCount);
 
 int main() {
-  int selected = 0;
-  const int totalOpt = 3;
-  Employee employees[20];
+  int selected = NEW;
+  const int totalOpt = TOTAL_OPT;
+  Employee employees[MAX_EMP];
   int empCount = 0;
-  int dynamicCapacity = 20;
+  int dynamicCapacity = MAX_EMP;
   int dynamicEmpCount = 0;
   DynamicEmployee* dynamicEmployees = new DynamicEmployee[dynamicCapacity];
 
@@ -35,22 +50,22 @@ int main() {
     //====================Arrows========================
     char byte1 = getch_linux();
 
-    if (byte1 == '\033') {
+    if (byte1 == ESC) {
       char byte2 = getch_linux();
       char byte3 = getch_linux();
 
       handleArrow(byte3, selected, totalOpt);
       // ====================Keys=============================
     } else if (byte1 == 'a' || byte1 == 'A' || byte1 == 'h' || byte1 == 'H') {
-      selected = 0;
+      selected = NEW;
     } else if (byte1 == 'b' || byte1 == 'B') {
-      selected = 1;
+      selected = DISPLAY;
     } else if (byte1 == 'c' || byte1 == 'C' || byte1 == 'f' || byte1 == 'F') {
-      selected = 2;
+      selected = EXIT;
       // ======================Enter===========================
     } else if (byte1 == '\n' || byte1 == '\r') {
-      if (selected == 0) {
-        cout << "\033[2J\033[H";
+      if (selected == NEW) {
+        cout << CLR;
 
         cout << "Do you want to use Static or Dynamic Array? (S/D):  " << endl;
 
@@ -61,9 +76,8 @@ int main() {
         } else if (choice == 'd' || choice == 'D') {
           newEmpDynamic(dynamicEmployees, dynamicEmpCount, dynamicCapacity);
         }
-      } else if (selected == 1) {
-        cout << "\033[2J\033[H";
-        cout << "\033[2J\033[H";
+      } else if (selected == DISPLAY) {
+        cout << CLR;
 
         cout << "Do you want to use Static or Dynamic Array? (S/D):  " << endl;
 
@@ -74,7 +88,7 @@ int main() {
         } else if (choice == 'd' || choice == 'D') {
           displayEmp(dynamicEmployees, dynamicEmpCount);
         }
-      } else if (selected == 2) {
+      } else if (selected == EXIT) {
         break;
       }
     }
@@ -89,9 +103,9 @@ void handleArrow(char direction, int& selected, const int totalOpt) {
   } else if (direction == 'B') {
     selected = (selected + 1) % totalOpt;  // down
   } else if (direction == 'H') {           // go to first item
-    selected = 0;
+    selected = NEW;
   } else if (direction == 'F') {  // go to last item
-    selected = totalOpt - 1;
+    selected = EXIT;
   }
 }
 
@@ -100,7 +114,7 @@ void displayMenu(int selected, int totalOpt) {
                            "3. Exit"};
 
   for (int i = 0; i < totalOpt; i++) {
-    setPosition(5, 8 + i);
+    setPosition(X, 8 + i);
 
     if (i == selected) {
       setColor(COLOR_GREEN);
@@ -119,40 +133,40 @@ void displayMenu(int selected, int totalOpt) {
 }
 
 void newEmp(Employee employees[], int& empCount) {
-  if (empCount >= 20) {
-    cout << "\033[2J\033[H";
-    setPosition(5, 5);
+  if (empCount >= MAX_EMP) {
+    cout << CLR;
+    setPosition(X, Y_SORRY);
     setColor(COLOR_RED);
     cout << "Sorry! Employee array is full :(" << endl;
     char key;
     do {
       setColor(COLOR_YELLOW);
-      setPosition(5, 7);
+      setPosition(X, Y_ESC);
       cout << "Press ESC to return..." << endl;
-    } while ((key = getch_linux()) != '\033');
+    } while ((key = getch_linux()) != ESC);
 
-    cout << "\033[2J\033[H";
+    cout << CLR;
     return;
   }
 
-  cout << "\033[2J\033[H";
+  cout << CLR;
 
   setColor(COLOR_GREEN);
-  setPosition(5, 3);
+  setPosition(X, Y_TITLE);
   cout << "NEW EMPLOYEE";
 
   setColor(COLOR_WHITE);
-  setPosition(5, 5);
+  setPosition(X, Y_ID);
   cout << "Enter employee id: ";
   cin >> employees[empCount].id;
 
   setColor(COLOR_WHITE);
-  setPosition(5, 6);
+  setPosition(X, Y_NAME);
   cout << "Enter employee name: ";
   cin >> employees[empCount].name;
 
   setColor(COLOR_GREEN);
-  setPosition(5, 7);
+  setPosition(X, Y_MSG);
   cout << "Employee Added! :)" << endl;
 
   empCount++;
@@ -161,11 +175,11 @@ void newEmp(Employee employees[], int& empCount) {
 
   do {
     setColor(COLOR_YELLOW);
-    setPosition(5, 11);
+    setPosition(X, Y_ESC);
     cout << "Press ESC to return..." << endl;
-  } while ((key = getch_linux()) != '\033');
+  } while ((key = getch_linux()) != ESC);
 
-  cout << "\033[2J\033[H";
+  cout << CLR;
 }
 
 // Function Templates: Instead of writing a function specifically for Employee,
@@ -173,25 +187,25 @@ void newEmp(Employee employees[], int& empCount) {
 
 template <typename T>
 void displayEmp(const T employees[], const int empCount) {
-  cout << "\033[2J\033[H";
+  cout << CLR;
 
   setColor(COLOR_GREEN);
-  setPosition(5, 3);
+  setPosition(X, Y_TITLE);
   cout << "EMPLOYEE LIST";
 
   if (empCount == 0) {
     setColor(COLOR_RED);
-    setPosition(5, 5);
+    setPosition(X, Y_SORRY);
     cout << "No employees found! :(";
   } else {
     setColor(COLOR_WHITE);
     for (int i = 0; i < empCount; i++) {
-      setPosition(5, 5 + i);
+      setPosition(X, 5 + i);
       cout << "#" << employees[i].id << " - Name: " << employees[i].name;
     }
     int totalRow = 5 + empCount + 2;
 
-    setPosition(5, totalRow);
+    setPosition(X, totalRow);
     setColor(COLOR_MAGENTA);
     cout << "Total Employees: " << empCount;
   }
@@ -201,9 +215,9 @@ void displayEmp(const T employees[], const int empCount) {
   do {
     setColor(COLOR_YELLOW);
     int totalRow = 5 + empCount + 3;
-    setPosition(5, totalRow);
+    setPosition(X, totalRow);
     cout << "Press ESC to return..." << endl;
-  } while ((key = getch_linux()) != '\033');
+  } while ((key = getch_linux()) != ESC);
 
-  cout << "\033[2J\033[H";
+  cout << CLR;
 }
